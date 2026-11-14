@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulseReel Mobilization Triage</title>
+<style>
+:root{--bg:#F7F7FB;--card:#fff;--ink:#14142B;--mut:#6B7280;--line:#E5E7EB;--pri:#5B3DF5;--pri2:#EEEAFE;--red:#E11D48;--amb:#F59E0B;--grn:#059669;--rad:14px}
+@media (prefers-color-scheme:dark){:root{--bg:#0E0E1A;--card:#171727;--ink:#F3F4F6;--mut:#9CA3AF;--line:#2A2A40;--pri2:#241E4D}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:18px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0}header p{margin:0;color:var(--mut)}
+.badge{font-size:11px;background:var(--pri2);color:var(--pri);padding:3px 9px;border-radius:99px;font-weight:600}
+main{display:grid;grid-template-columns:300px 1fr;gap:16px;padding:0 24px 32px;max-width:1280px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:16px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 10px}
+.reel{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.reel:hover{background:var(--pri2)}.reel.on{border-color:var(--pri);background:var(--pri2)}
+.reel b{display:block;font-size:13px}.reel small{color:var(--mut)}
+.sc{min-width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:3px 0 9px}.bar i{display:block;height:100%;background:var(--pri)}
+.row{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.ladder{display:flex;gap:6px}.rung{flex:1;padding:8px;border-radius:10px;border:1px solid var(--line);font-size:12px;text-align:center;color:var(--mut)}
+.rung.on{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}.rung.ok{background:var(--grn);color:#fff;border-color:var(--grn);font-weight:600}
+.chunk{border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:8px;font-size:12.5px}.chunk b{color:var(--pri)}
+pre{white-space:pre-wrap;font:12.5px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px;margin:8px 0 0}
+button{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}button:disabled{opacity:.6}
+input[type=range]{width:100%}label{font-size:12px;color:var(--mut);display:block;margin-top:8px}
+.ctl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+details summary{cursor:pointer;color:var(--pri);font-weight:600;font-size:13px}
+.note{font-size:12px;color:var(--mut)}svg{width:100%;height:auto;display:block}
+</style></head><body>
+<header><div><h1>PulseReel Mobilization Triage</h1><p>Detect fast-mobilizing content, retrieve policy, brief the human reviewer.</p></div><span class="badge">Simulated data</span><span class="badge" id="mode"></span></header>
+<main>
+ <aside class="card"><h2>Flagged queue (live feed)</h2><div id="list"></div>
+  <p class="note">Sorted by mobilization score at the selected hour. All reels, counts and policies are simulated.</p></aside>
+ <section class="grid">
+  <div class="card full"><h2>Time since upload</h2>
+   <div class="row"><span id="title"></span><span>Hour <b id="hh"></b> of 72</span></div>
+   <input id="hour" type="range" min="1" max="72" value="30"><div id="chart"></div>
+   <p class="note" id="lead"></p></div>
+  <div class="card"><h2>Mobilization score</h2><div id="big" style="font-size:44px;font-weight:800"></div><div id="signals"></div></div>
+  <div class="card"><h2>Response ladder</h2><div class="ladder" id="ladder"></div><p id="rungtxt" style="margin:12px 0 0;font-weight:600"></p>
+   <p class="note">The system proposes. A human reviewer decides. No rung deletes a reel or blocks the creator.</p></div>
+  <div class="card"><h2>Retrieved policy (RAG)</h2><div id="ctx"></div>
+   <details><summary>Index: <span id="idxinfo"></span></summary><div class="note" id="idxdetail"></div></details></div>
+  <div class="card"><h2>Reviewer brief</h2>
+   <div class="ctl"><div><label>Temperature <b id="tv"></b></label><input id="temp" type="range" min="0" max="1" step=".05" value=".2"></div>
+    <div><label>Top-p <b id="pv"></b></label><input id="topp" type="range" min=".1" max="1" step=".05" value=".8"></div>
+    <div><label>Max tokens <b id="mv"></b></label><input id="maxt" type="range" min="80" max="600" step="20" value="300"></div></div>
+   <div style="margin-top:12px"><button id="gen">Generate brief</button> <span class="note" id="status"></span></div>
+   <pre id="brief">Select a reel and press Generate brief.</pre>
+   <details><summary>Prompt inspector (system prompt + context sent to the model)</summary><pre id="prompt"></pre></details></div>
+ </section>
+</main>
+<script src="data.js"></script><script src="core.js"></script><script src="config.js"></script><script src="app.js"></script>
+</body></html>
